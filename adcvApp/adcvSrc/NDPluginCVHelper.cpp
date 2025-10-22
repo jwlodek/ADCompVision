@@ -974,6 +974,34 @@ ADCVStatus_t NDPluginCVHelper::log_scaling(Mat& img, double* inputs, double* out
     return status;
 }
 
+
+ADCVStatus_t NDPluginCVHelper::warp_perspective(Mat& img, double* inputs, double* outputs) {
+    vector<Point2f> srcPoints;
+    vector<Point2f> dstPoints;
+    const char* functionName = "warp_perspective";
+    ADCVStatus_t status = cvHelperSuccess;
+    srcPoints.push_back(Point2f(inputs[0], inputs[1]));
+    srcPoints.push_back(Point2f(inputs[2], inputs[3]));
+    srcPoints.push_back(Point2f(inputs[4], inputs[5]));
+    srcPoints.push_back(Point2f(inputs[6], inputs[7]));
+
+    int width = static_cast<int>(inputs[8]);
+    int height = static_cast<int>(inputs[9]);
+    dstPoints.push_back(Point2f(0, 0));
+    dstPoints.push_back(Point2f(width - 1, 0));
+    dstPoints.push_back(Point2f(width - 1, height - 1));
+    dstPoints.push_back(Point2f(0, height - 1));
+
+    try {
+        Mat perspectiveMatrix = getPerspectiveTransform(srcPoints, dstPoints);
+        warpPerspective(img, img, perspectiveMatrix, Size(width, height));
+        cvHelperStatus = "Finished computing warped image";
+    } catch (Exception& e) {
+        print_cv_error(e, functionName);
+        status = cvHelperError;
+    }
+}
+
 //------------------------ End of OpenCV wrapper functions
 //-------------------------------------------------
 
@@ -1464,6 +1492,29 @@ ADCVStatus_t NDPluginCVHelper::get_log_scaling_description(string* inputDesc, st
     populate_remaining_descriptions(inputDesc, outputDesc, numInput, numOutput);
     return status;
 }
+
+ADCVStatus_t NDPluginCVHelper::get_warp_perspective_description(string* inputDesc,
+                                                            string* outputDesc,
+                                                            string* description) {
+    ADCVStatus_t status = cvHelperSuccess;
+    int numInput = 8;
+    int numOutput = 0;
+    inputDesc[0] = "X1";
+    inputDesc[1] = "Y1";
+    inputDesc[2] = "X2";
+    inputDesc[3] = "Y2";
+    inputDesc[4] = "X3";
+    inputDesc[5] = "Y3";
+    inputDesc[6] = "X4";
+    inputDesc[7] = "Y4";
+    inputDesc[8] = "Output Width";
+    inputDesc[9] = "Output Height";
+    *description = "Apply perspective warp to image based on source and destination points";
+    populate_remaining_descriptions(inputDesc, outputDesc, numInput, numOutput);
+    return status;
+}
+
+
 /* ---------------------- Functions called from the EPICS Plugin implementation
  * ----------------------- */
 
@@ -1509,6 +1560,9 @@ ADCVStatus_t NDPluginCVHelper::processImage(Mat& image, ADCVFunction_t function,
             break;
         case ADCV_LogScaling:
             status = log_scaling(image, inputs, outputs);
+            break;
+        case ADCV_WarpPerspective:
+            status = warp_perspective(image, inputs, outputs);
             break;
         case ADCV_Sharpen:
             status = downscale_image_8bit(image, camera_depth);
@@ -1597,6 +1651,9 @@ ADCVStatus_t NDPluginCVHelper::getFunctionDescription(ADCVFunction_t function, s
             break;
         case ADCV_LogScaling:
             status = get_log_scaling_description(inputDesc, outputDesc, description);
+            break;
+        case ADCV_WarpPerspective:
+            status = get_warp_perspective_description(inputDesc, outputDesc, description);
             break;
         /*
         case ADCV_MovementVectors:

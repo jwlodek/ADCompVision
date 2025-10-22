@@ -58,7 +58,7 @@ using namespace std;
  *
  */
 #define N_FUNC_1 7
-#define N_FUNC_2 5
+#define N_FUNC_2 6
 #define N_FUNC_3 5
 
 // Total Number of CV functions
@@ -78,10 +78,11 @@ typedef enum {
     ADCV_Sharpen = 8,
     ADCV_ConvertFormat = 9,
     ADCV_LogScaling = 10,
-    ADCV_UserDefined = 11,
-    ADCV_ImageStats = 12,
-    ADCV_DistanceCheck = 13,
-    ADCV_VideoRecord = 14,
+    ADCV_WarpPerspective = 11,
+    ADCV_UserDefined = 12,
+    ADCV_ImageStats = 13,
+    ADCV_DistanceCheck = 14,
+    ADCV_VideoRecord = 15,
 } ADCVFunction_t;
 
 // enum that stores file save format
@@ -147,6 +148,7 @@ class NDPluginCVHelper {
     ADCVStatus_t convert_image_format(Mat& img, double* inputs, double* outputs);
     ADCVStatus_t video_record(Mat& img, double* inputs, double* outputs);
     ADCVStatus_t log_scaling(Mat& img, double* inputs, double* outputs);
+    ADCVStatus_t warp_perspective(Mat& img, double* inputs, double* outputs);
 
     // under development
     ADCVStatus_t movement_vectors(Mat& img, double* inputs, double* outputs);
@@ -183,6 +185,8 @@ class NDPluginCVHelper {
                                               string* description);
     ADCVStatus_t get_log_scaling_description(string* inputDesc, string* outputDesc,
                                              string* description);
+    ADCVStatus_t get_warp_perspective_description(string* inputDesc, string* outputDesc,
+                                                  string* description);
 
     // Under development
     ADCVStatus_t get_movement_vectors_description(string* inputDesc, string* outputDesc,
