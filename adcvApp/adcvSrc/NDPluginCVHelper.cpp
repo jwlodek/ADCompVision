@@ -1497,7 +1497,7 @@ ADCVStatus_t NDPluginCVHelper::get_warp_perspective_description(string* inputDes
                                                             string* outputDesc,
                                                             string* description) {
     ADCVStatus_t status = cvHelperSuccess;
-    int numInput = 8;
+    int numInput = 10;
     int numOutput = 0;
     inputDesc[0] = "X1";
     inputDesc[1] = "Y1";
